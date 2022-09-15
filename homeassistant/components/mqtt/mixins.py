@@ -74,6 +74,7 @@ from .const import (
     DATA_MQTT_DISCOVERY_REGISTRY_HOOKS,
     DATA_MQTT_RELOAD_DISPATCHERS,
     DATA_MQTT_RELOAD_ENTRY,
+    DATA_MQTT_RELOAD_HANDLERS,
     DATA_MQTT_UPDATED_CONFIG,
     DEFAULT_ENCODING,
     DEFAULT_PAYLOAD_AVAILABLE,
@@ -364,13 +365,28 @@ async def async_setup_entry_helper(
         )
     )
 
-    # discover manual items
-    await asyncio.gather(
-        *[
-            async_setup(config)
-            for config in await async_get_platform_config_from_yaml(hass, domain)
-        ]
-    )
+    async def _async_setup_entities() -> None:
+        # setup manual items
+        if DATA_MQTT_UPDATED_CONFIG in hass.data:
+            # The platform has been reloaded
+            config_yaml = hass.data[DATA_MQTT_UPDATED_CONFIG]
+        else:
+            config_yaml = hass.data.get(DATA_MQTT_CONFIG, {})
+        if not config_yaml:
+            return
+        if domain not in config_yaml:
+            return
+        await asyncio.gather(
+            *[
+                async_setup(config)
+                for config in await async_get_platform_config_from_yaml(
+                    hass, domain, config_yaml
+                )
+            ]
+        )
+
+    hass.data.setdefault(DATA_MQTT_RELOAD_HANDLERS, {})[domain] = _async_setup_entities
+    await _async_setup_entities()
 
 
 async def async_setup_platform_helper(

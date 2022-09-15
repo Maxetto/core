@@ -38,6 +38,7 @@ DATA_MQTT_CONFIG = "mqtt_config"
 MQTT_DATA_DEVICE_TRACKER_LEGACY = "mqtt_device_tracker_legacy"
 DATA_MQTT_RELOAD_DISPATCHERS = "mqtt_reload_dispatchers"
 DATA_MQTT_RELOAD_ENTRY = "mqtt_reload_entry"
+DATA_MQTT_RELOAD_HANDLERS = "mqtt_reload_handlers"
 DATA_MQTT_RELOAD_NEEDED = "mqtt_reload_needed"
 DATA_MQTT_UPDATED_CONFIG = "mqtt_updated_config"
 

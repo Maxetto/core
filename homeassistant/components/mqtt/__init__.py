@@ -78,6 +78,7 @@ from .const import (  # noqa: F401
     DATA_MQTT_DISCOVERY_REGISTRY_HOOKS,
     DATA_MQTT_RELOAD_DISPATCHERS,
     DATA_MQTT_RELOAD_ENTRY,
+    DATA_MQTT_RELOAD_HANDLERS,
     DATA_MQTT_RELOAD_NEEDED,
     DATA_MQTT_SUBSCRIPTIONS_TO_RESTORE,
     DATA_MQTT_UPDATED_CONFIG,
@@ -90,7 +91,6 @@ from .const import (  # noqa: F401
     PLATFORMS,
     RELOADABLE_PLATFORMS,
 )
-from .mixins import async_discover_yaml_entities
 from .models import (  # noqa: F401
     MqttCommandTemplate,
     MqttValueTemplate,
@@ -442,6 +442,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 for entity in mqtt_platform.entities.values()
                 if not entity._discovery_data  # type: ignore[attr-defined] # pylint: disable=protected-access
                 if mqtt_platform.config_entry
+                and mqtt_platform.domain in RELOADABLE_PLATFORMS
             ]
             await asyncio.gather(*tasks)
 
@@ -450,8 +451,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await asyncio.gather(
                 *(
                     [
-                        async_discover_yaml_entities(hass, component)
+                        hass.data[DATA_MQTT_RELOAD_HANDLERS][component]()
                         for component in RELOADABLE_PLATFORMS
+                        if component in hass.data[DATA_MQTT_RELOAD_HANDLERS]
                     ]
                 )
             )
