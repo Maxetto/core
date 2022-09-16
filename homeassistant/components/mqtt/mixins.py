@@ -342,7 +342,7 @@ async def async_setup_entry_helper(
     )
 
     async def _async_setup_entities() -> None:
-        # setup manual items
+        """Set up MQTT items from configuration.yaml."""
         if DATA_MQTT_UPDATED_CONFIG in hass.data:
             # The platform has been reloaded
             config_yaml = hass.data[DATA_MQTT_UPDATED_CONFIG]
@@ -361,6 +361,7 @@ async def async_setup_entry_helper(
             ]
         )
 
+    # discover manual configured MQTT items
     hass.data.setdefault(DATA_MQTT_RELOAD_HANDLERS, {})[domain] = _async_setup_entities
     await _async_setup_entities()
 
